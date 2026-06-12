@@ -134,17 +134,19 @@ button { font-family: inherit; cursor: pointer; }
 /* =============== NAV =============== */
 .nav {
   position: fixed;
-  top: 1rem; left: 1rem; right: 1rem;
+  top: 0; left: 0; right: 0;
   z-index: 100;
-  padding: 0.85rem 1.5rem 0.85rem 1.5rem;
+  padding: 0.85rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.92);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-  border-radius: var(--r-pill);
-  box-shadow: var(--shadow-sm);
+  -webkit-backdrop-filter: blur(20px);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: 0 2px 16px rgba(168,150,255,0.10);
 }
 .logo {
   display: flex;
@@ -653,7 +655,7 @@ button { font-family: inherit; cursor: pointer; }
 /* Hero visual */
 .hero-visual {
   position: relative;
-  height: 720px;
+  height: 760px;
 }
 .hero-card {
   position: absolute;
@@ -684,7 +686,7 @@ button { font-family: inherit; cursor: pointer; }
 .hero-card.bottom {
   width: 300px;
   aspect-ratio: 3/4;
-  bottom: -12%;
+  bottom: -24%;
   left: 16%;
   z-index: 4;
   animation: cardIn 1s cubic-bezier(0.25, 1, 0.5, 1) 1.4s forwards, floatC 9s ease-in-out 2.4s infinite;
