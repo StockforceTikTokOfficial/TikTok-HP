@@ -465,8 +465,8 @@ button { font-family: inherit; cursor: pointer; }
   max-width: 1400px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 4rem;
+  grid-template-columns: 1fr 1.08fr;
+  gap: 2.5rem;
   align-items: center;
   width: 100%;
 }
@@ -649,7 +649,7 @@ button { font-family: inherit; cursor: pointer; }
 /* Hero visual */
 .hero-visual {
   position: relative;
-  height: 600px;
+  height: 640px;
 }
 .hero-card {
   position: absolute;
@@ -660,28 +660,28 @@ button { font-family: inherit; cursor: pointer; }
   opacity: 0;
 }
 .hero-card.main {
-  width: 320px;
+  width: 380px;
   aspect-ratio: 3/4;
-  top: 5%;
-  right: 5%;
+  top: 4%;
+  right: 2%;
   z-index: 3;
   animation: cardIn 1s cubic-bezier(0.25, 1, 0.5, 1) 0.8s forwards, floatA 7s ease-in-out 1.8s infinite;
   border: 3px solid white;
 }
 .hero-card.left {
-  width: 220px;
+  width: 280px;
   aspect-ratio: 3/4;
   top: 15%;
-  left: 5%;
+  left: 0%;
   z-index: 2;
   animation: cardIn 1s cubic-bezier(0.25, 1, 0.5, 1) 1.1s forwards, floatB 8s ease-in-out 2.1s infinite;
   border: 3px solid white;
 }
 .hero-card.bottom {
-  width: 240px;
+  width: 300px;
   aspect-ratio: 3/4;
-  bottom: 5%;
-  left: 30%;
+  bottom: 2%;
+  left: 22%;
   z-index: 4;
   animation: cardIn 1s cubic-bezier(0.25, 1, 0.5, 1) 1.4s forwards, floatC 9s ease-in-out 2.4s infinite;
   border: 3px solid white;
@@ -794,8 +794,8 @@ button { font-family: inherit; cursor: pointer; }
   overflow: hidden;
   background: var(--fg);
   color: white;
-  border-radius: var(--r-xl);
-  margin: 0 2rem 5rem;
+  border-radius: 0;
+  margin: 0 0 5rem;
   position: relative;
   z-index: 5;
 }
@@ -2081,7 +2081,7 @@ footer {
   .hero-card.main { width: 220px; right: 0; }
   .hero-card.left { width: 160px; }
   .hero-card.bottom { width: 170px; left: 25%; }
-  .marquee { margin: 0 1.25rem 4rem; }
+  .marquee { margin: 0 0 4rem; }
   section { padding: 5rem 1.25rem; }
   .liver-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
   .ranking-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
