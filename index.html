@@ -293,6 +293,9 @@ button { font-family: inherit; cursor: pointer; }
 /* =============== HERO =============== */
 .hero {
   min-height: 100vh;
+  max-width: none;
+  width: 100%;
+  margin: 0;
   padding: 7rem 2rem 4rem;
   position: relative;
   overflow: hidden;
@@ -649,7 +652,7 @@ button { font-family: inherit; cursor: pointer; }
 /* Hero visual */
 .hero-visual {
   position: relative;
-  height: 640px;
+  height: 680px;
 }
 .hero-card {
   position: absolute;
@@ -680,7 +683,7 @@ button { font-family: inherit; cursor: pointer; }
 .hero-card.bottom {
   width: 300px;
   aspect-ratio: 3/4;
-  bottom: 2%;
+  bottom: -6%;
   left: 22%;
   z-index: 4;
   animation: cardIn 1s cubic-bezier(0.25, 1, 0.5, 1) 1.4s forwards, floatC 9s ease-in-out 2.4s infinite;
@@ -2753,26 +2756,21 @@ window.addEventListener('popstate', function(e) {
 window.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() {
     var hash = window.location.hash;
+    // 個別ライバー/記事の詳細リンクだけは復元する
     if (hash.startsWith('#/')) {
-      var path = hash.substring(2);
-      var parts = path.split('/');
+      var parts = hash.substring(2).split('/');
       var view = parts[0];
       var id = parts[1];
-
-      if (view === 'liver' && id) {
-        openLiver(id);
-      } else if (view === 'article' && id) {
-        openArticle(id);
-      } else if (view === 'liver' || view === 'article') {
-        showView('main', view === 'liver' ? 'liver' : 'news', true);
-      } else {
-        showView(view, null, true);
-      }
-    } else if (hash.length > 1) {
-      showView('main', hash.substring(1), true);
-    } else {
-      showView('main', null, true);
+      if (view === 'liver' && id) { openLiver(id); return; }
+      if (view === 'article' && id) { openArticle(id); return; }
     }
+    // それ以外（リロード等）は常にTOPを表示し、ハッシュも消す
+    try {
+      history.replaceState({ view: 'main', scrollTo: null, scrollY: 0 }, '',
+        window.location.pathname + window.location.search);
+    } catch (e) {}
+    showView('main', null, true, 0);
+    window.scrollTo(0, 0);
   }, 100);
 });
 
