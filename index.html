@@ -3269,11 +3269,9 @@ function loadAboutImages() {
         var pos = img.position;
         if (pos >= 1 && pos <= divs.length && img.url) {
           var targetDiv = divs[pos - 1];
-          targetDiv.style.backgroundImage = 'url(\'' + proxyImg(img.url) + '\')';
-          targetDiv.style.backgroundSize = 'cover';
-          targetDiv.style.backgroundPosition = 'center';
-          // 既存のパステルグラデーションを上書き
-          targetDiv.style.background = 'url(\'' + proxyImg(img.url) + '\') center / cover no-repeat';
+          var objPos = (img.objectPosition && String(img.objectPosition).trim()) || 'center';
+          // 既存のパステルグラデーションを上書き(位置はスプシのD列で調整)
+          targetDiv.style.background = 'url(\'' + proxyImg(img.url) + '\') ' + objPos + ' / cover no-repeat';
         }
       });
     },
