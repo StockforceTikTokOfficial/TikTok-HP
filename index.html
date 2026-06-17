@@ -1551,14 +1551,16 @@ footer {
   font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(3rem, 7vw, 5rem);
-  line-height: 0.95;
-  letter-spacing: -0.03em;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
   background: linear-gradient(135deg, var(--pink), var(--lavender));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 0.3rem;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .profile-name-jp {
   font-family: var(--font-jp);
@@ -3149,9 +3151,24 @@ function openLiver(liverId) {
   }
 }
 
+// 名前の長さに応じてフォントサイズを自動調整（長い名前の崩れ防止）
+function fitProfileName(el, name) {
+  var clean = (name || '').replace(/[\uFE0E\uFE0F]/g, '');
+  var len = Array.from(clean).length;
+  var size;
+  if (len <= 6)       size = 'clamp(3rem, 7vw, 5rem)';
+  else if (len <= 8)  size = 'clamp(2.6rem, 6vw, 4.2rem)';
+  else if (len <= 10) size = 'clamp(2.2rem, 5vw, 3.6rem)';
+  else if (len <= 13) size = 'clamp(1.9rem, 4.2vw, 3rem)';
+  else                size = 'clamp(1.6rem, 3.6vw, 2.5rem)';
+  el.style.fontSize = size;
+}
+
 function renderLiver(liver) {
   document.getElementById('liver-breadcrumb-current').textContent = liver.nameEn;
-  document.getElementById('liver-profile-name').textContent = liver.nameEn;
+  var nameEl = document.getElementById('liver-profile-name');
+  nameEl.textContent = liver.nameEn;
+  fitProfileName(nameEl, liver.nameEn);
   document.getElementById('liver-profile-name-jp').textContent = liver.nameJp;
   document.getElementById('liver-profile-handle').textContent = liver.handle;
 
