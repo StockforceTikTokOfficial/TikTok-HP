@@ -2780,6 +2780,7 @@ window.addEventListener('DOMContentLoaded', function() {
       var id = parts[1];
       if (view === 'liver' && id) { openLiver(id); return; }
       if (view === 'article' && id) { openArticle(id); return; }
+      if (view === 'article') { showView('main', 'news'); return; }
       if (view === 'ranking') { showView('ranking'); return; }
       if (view === 'about') { showView('about'); return; }
       if (view === 'entry') { showView('entry'); return; }
