@@ -2986,7 +2986,9 @@ function renderArticle(article) {
   if (article.body) {
     var paragraphs = article.body.split(/\n\n+/);
     bodyHtml += paragraphs.map(function(p) {
-      return '<p>' + escapeHtml(p).replace(/\n/g, '<br>') + '</p>';
+      var escaped = escapeHtml(p).replace(/\n/g, '<br>');
+      var linked = escaped.replace(/(https?:\/\/[^\s<>"']+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+      return '<p>' + linked + '</p>';
     }).join('');
   }
   document.getElementById('article-body-content').innerHTML = bodyHtml;
