@@ -2808,7 +2808,7 @@ function proxyImg(url) {
 // Newsキャッシュ(記事クリック時に詳細表示で使う)
 var NEWS_CACHE = [];
 
-function jsonpRequest(url, callbackPrefix, onSuccess, onError) {
+function jsonpRequest(url, callbackPrefix, onSuccess, onError, timeoutMs) {
   var callbackName = callbackPrefix + '_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
   var timeoutId;
 
@@ -2834,7 +2834,7 @@ function jsonpRequest(url, callbackPrefix, onSuccess, onError) {
       var s = document.getElementById(callbackName);
       if (s) s.remove();
     }
-  }, 10000);
+  }, timeoutMs || 10000);
 
   var script = document.createElement('script');
   script.id = callbackName;
@@ -3342,7 +3342,10 @@ function submitContactForm(event) {
       btn.disabled = false;
       btn.textContent = 'Send Message →';
       btn.style.opacity = '1';
-    }
+    },
+    // お問い合わせはGAS側でスプレッドシート書き込みとメール送信2通を行うため、
+    // 完了までに10秒以上かかることがある。待ち時間を60秒に延ばす。
+    60000
   );
 }
 </script>
