@@ -55,6 +55,7 @@
   }
 }
 </script>
+<link rel="preconnect" href="https://gas-cache.tiktok-ranking.workers.dev">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -2799,10 +2800,42 @@ window.addEventListener('DOMContentLoaded', function() {
 const RANKING_API_URL = 'https://gas-cache.tiktok-ranking.workers.dev';
 
 // Google Drive画像をWorker経由にして高速化
-function proxyImg(url) {
+function proxyImg(url, width) {
   if (!url) return url;
   if (url.indexOf('drive.google.com') === -1 && url.indexOf('googleusercontent.com') === -1) return url;
+  if (url.indexOf('drive.google.com') !== -1) {
+    try {
+      var imageUrl = new URL(url);
+      imageUrl.searchParams.set('sz', 'w' + (width || 640));
+      url = imageUrl.href;
+    } catch (err) { /* Preserve an invalid or legacy URL. */ }
+  }
   return RANKING_API_URL + '/img?url=' + encodeURIComponent(url);
+}
+
+
+// Load off-screen backgrounds shortly before they enter the viewport.
+var backgroundObserver = typeof IntersectionObserver !== 'undefined'
+  ? new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        applyLazyBackground(entry.target);
+        backgroundObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: '300px 0px' }) : null;
+
+function applyLazyBackground(el) {
+  var url = el.getAttribute('data-lazy-bg');
+  if (!url) return;
+  el.style.backgroundImage = 'url(' + JSON.stringify(url) + ')';
+  el.removeAttribute('data-lazy-bg');
+}
+
+function observeLazyBackgrounds() {
+  document.querySelectorAll('[data-lazy-bg]').forEach(function(el) {
+    if (backgroundObserver) backgroundObserver.observe(el);
+    else applyLazyBackground(el);
+  });
 }
 
 // Newsキャッシュ(記事クリック時に詳細表示で使う)
@@ -2816,6 +2849,7 @@ function jsonpRequest(url, callbackPrefix, onSuccess, onError, timeoutMs) {
     clearTimeout(timeoutId);
     try {
       onSuccess(data);
+      observeLazyBackgrounds();
     } catch (err) {
       console.error('処理エラー:', err);
       if (onError) onError(err);
@@ -2898,7 +2932,7 @@ function loadNewsList() {
       container.innerHTML = news.map(function(item, idx) {
         var tagClass = getTagClass(item.category);
         var thumbStyle = item.thumbnail
-          ? 'style="background-image: url(\'' + escapeAttr(proxyImg(item.thumbnail)) + '\');"'
+          ? 'data-lazy-bg="' + escapeAttr(proxyImg(item.thumbnail)) + '"'
           : '';
         var thumbClass = item.thumbnail ? 'news-thumb' : 'news-thumb p' + ((idx % 4) + 1);
         return '<div class="news-card" onclick="openArticle(\'' + escapeAttr(item.id) + '\')">' +
@@ -2978,7 +3012,7 @@ function renderArticle(article) {
   var imgWrap = document.getElementById('article-image-wrap');
   if (article.heroImage) {
     imgWrap.style.display = '';
-    document.getElementById('article-hero-image').style.backgroundImage = 'url(\'' + proxyImg(article.heroImage) + '\')';
+    document.getElementById('article-hero-image').style.backgroundImage = 'url(\'' + proxyImg(article.heroImage, 1280) + '\')';
   } else {
     imgWrap.style.display = 'none';
   }
@@ -3098,7 +3132,7 @@ function renderLiverGrid() {
   container.innerHTML = filtered.map(function(l, idx) {
     var badgeClass = getBadgeClass(l.badge);
     var thumbStyle = l.thumbnail
-      ? 'style="background-image: url(\'' + escapeAttr(proxyImg(l.thumbnail)) + '\');"'
+      ? 'data-lazy-bg="' + escapeAttr(proxyImg(l.thumbnail)) + '"'
       : '';
     var thumbClass = l.thumbnail ? '' : 'placeholder-' + ((idx % 4) + 1);
     var stats = '';
@@ -3129,6 +3163,7 @@ function filterLivers(btnEl, filter) {
   btnEl.classList.add('active');
   CURRENT_LIVER_FILTER = filter;
   renderLiverGrid();
+  observeLazyBackgrounds();
 }
 
 function openLiver(liverId) {
@@ -3182,9 +3217,9 @@ function renderLiver(liver) {
   // 写真
   var photoEl = document.getElementById('liver-profile-photo');
   if (liver.profileImage) {
-    photoEl.style.backgroundImage = 'url(\'' + proxyImg(liver.profileImage) + '\')';
+    photoEl.style.backgroundImage = 'url(\'' + proxyImg(liver.profileImage, 1280) + '\')';
   } else if (liver.thumbnail) {
-    photoEl.style.backgroundImage = 'url(\'' + proxyImg(liver.thumbnail) + '\')';
+    photoEl.style.backgroundImage = 'url(\'' + proxyImg(liver.thumbnail, 1280) + '\')';
   } else {
     photoEl.style.backgroundImage = 'linear-gradient(135deg, var(--pink-soft), var(--lavender-soft))';
   }
@@ -3278,7 +3313,10 @@ function loadAboutImages() {
           var targetDiv = divs[pos - 1];
           var objPos = (img.objectPosition && String(img.objectPosition).trim()) || 'center';
           // 既存のパステルグラデーションを上書き(位置はスプシのD列で調整)
-          targetDiv.style.background = 'url(\'' + proxyImg(img.url) + '\') ' + objPos + ' / cover no-repeat';
+          targetDiv.style.backgroundPosition = objPos;
+          targetDiv.style.backgroundSize = 'cover';
+          targetDiv.style.backgroundRepeat = 'no-repeat';
+          targetDiv.setAttribute('data-lazy-bg', proxyImg(img.url, 960));
         }
       });
     },
