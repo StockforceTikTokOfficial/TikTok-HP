@@ -3294,36 +3294,48 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============== About Images Loader ==============
-function loadAboutImages() {
-  var container = document.getElementById('about-images');
-  if (!container) return;
+var ABOUT_INITIAL_IMAGES = [{"position":1,"description":"左上(大)","url":"https://drive.google.com/thumbnail?id=1dxhaznloSLQYxFGvSzDjrCqwgnQKLobH&sz=w2000","objectPosition":"50% 30%"},{"position":2,"description":"右上","url":"https://drive.google.com/thumbnail?id=1fxk38X09ICpV97gP1S3AuVtUY0MVVFDF&sz=w2000","objectPosition":"center"},{"position":3,"description":"右中央","url":"https://drive.google.com/thumbnail?id=1lbdNHYGBLHMQ9ilgGjKx_J80R_Ol58M6&sz=w2000","objectPosition":"center"},{"position":4,"description":"右下(大) ","url":"https://drive.google.com/thumbnail?id=1h9obPJLWevf0EnVqB1tKcg20CDjmyEg0&sz=w2000","objectPosition":"center"}];
+var ABOUT_IMAGE_CACHE_KEY = 'stockforce-about-images-v1';
 
+function renderAboutImages(images) {
+  var container = document.getElementById('about-images');
+  if (!container || !Array.isArray(images)) return;
+  var divs = container.children;
+  Array.from(divs).forEach(function(el) {
+    if (backgroundObserver) backgroundObserver.unobserve(el);
+    el.removeAttribute('data-lazy-bg');
+    el.style.backgroundImage = '';
+  });
+  images.forEach(function(img) {
+    var pos = Number(img.position);
+    if (pos < 1 || pos > divs.length || !Number.isInteger(pos) || !img.url) return;
+    var el = divs[pos - 1];
+    el.style.backgroundPosition = (img.objectPosition && String(img.objectPosition).trim()) || 'center';
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundRepeat = 'no-repeat';
+    el.style.backgroundImage = 'url(' + JSON.stringify(proxyImg(img.url, 640)) + ')';
+  });
+}
+
+function loadAboutImages() {
+  var initial = ABOUT_INITIAL_IMAGES;
+  try {
+    var cached = JSON.parse(localStorage.getItem(ABOUT_IMAGE_CACHE_KEY));
+    if (cached && Array.isArray(cached.images) && Date.now() - cached.savedAt < 86400000) initial = cached.images;
+  } catch (err) { /* Storage may be unavailable. */ }
+  renderAboutImages(initial);
   jsonpRequest(
     RANKING_API_URL + '?action=about',
     'aboutCb',
     function(data) {
-      var images = data.images || [];
-      if (images.length === 0) return;
-
-      // 既存の5つのdivを取得
-      var divs = container.children;
-      images.forEach(function(img) {
-        var pos = img.position;
-        if (pos >= 1 && pos <= divs.length && img.url) {
-          var targetDiv = divs[pos - 1];
-          var objPos = (img.objectPosition && String(img.objectPosition).trim()) || 'center';
-          // 既存のパステルグラデーションを上書き(位置はスプシのD列で調整)
-          targetDiv.style.backgroundPosition = objPos;
-          targetDiv.style.backgroundSize = 'cover';
-          targetDiv.style.backgroundRepeat = 'no-repeat';
-          targetDiv.setAttribute('data-lazy-bg', proxyImg(img.url, 960));
-        }
-      });
+      if (!data || !Array.isArray(data.images)) return;
+      renderAboutImages(data.images);
+      try {
+        localStorage.setItem(ABOUT_IMAGE_CACHE_KEY, JSON.stringify({images: data.images, savedAt: Date.now()}));
+      } catch (err) { /* Image display does not depend on storage. */ }
     },
-    function(err) {
-      console.error('About画像取得失敗:', err);
-      // エラー時はデフォルトのパステルカラーがそのまま使われる
-    }
+    function(err) { console.error('About画像の最新情報取得失敗:', err); },
+    60000
   );
 }
 
