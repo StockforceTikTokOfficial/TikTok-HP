@@ -2928,7 +2928,7 @@ function loadNewsList() {
   if (!container) return;
 
   jsonpRequest(
-    RANKING_API_URL + '?action=news&limit=3',
+    RANKING_API_URL + '?action=news',
     'newsCb',
     function(data) {
       var news = data.news || [];
