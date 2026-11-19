@@ -2152,7 +2152,7 @@ footer {
     <a onclick="showView('main', 'top')" class="active">Home</a>
     <a onclick="showView('main', 'about')">About</a>
     <a onclick="showView('main', 'liver')">Liver</a>
-    <a onclick="showView('main', 'ranking')">Ranking</a>
+    <a href="https://tiktok-ranking-cloud-trial.sasaki6960.chatgpt.site/">Ranking</a>
     <a onclick="showView('main', 'news')">News</a>
     <a onclick="showView('main', 'entry')">Entry</a>
   </div>
@@ -2169,7 +2169,7 @@ footer {
     <a onclick="navTo('main', 'top')">Home</a>
     <a onclick="navTo('about')">About</a>
     <a onclick="navTo('main', 'liver')">Liver</a>
-    <a onclick="navTo('main', 'ranking')">Ranking</a>
+    <a href="https://tiktok-ranking-cloud-trial.sasaki6960.chatgpt.site/">Ranking</a>
     <a onclick="navTo('main', 'news')">News</a>
     <a onclick="navTo('main', 'entry')">Entry</a>
     <a class="mobile-drawer-cta" onclick="navTo('contact')">Contact →</a>
@@ -2320,11 +2320,13 @@ footer {
 <section class="ranking-section" id="ranking">
   <span class="section-label">🏆 Ranking</span>
   <h2 class="section-title">イベント <em>ランキング</em></h2>
-  <p class="section-subtitle">開催中のイベントランキングをご覧いただけます。各イベントをタップすると詳細ランキングが表示されます。</p>
+  <p class="section-subtitle">イベントごとの最新ランキングは、公開ランキング一覧からご覧いただけます。</p>
 
   <div id="event-ranking-list" class="event-ranking-list">
-    <!-- イベント一覧が自動で挿入されます -->
-    <div class="event-loading">読み込み中...</div>
+    <a class="event-card" href="https://tiktok-ranking-cloud-trial.sasaki6960.chatgpt.site/">
+      <div class="event-card-icon">🏆</div>
+      <div class="event-card-body"><div class="event-card-label">LIVE RANKING</div><div class="event-card-name">イベントランキング一覧を見る</div></div>
+    </a>
   </div>
 </section>
 
@@ -2410,7 +2412,7 @@ footer {
         <h4>Site</h4>
         <a onclick="showView('about')">About</a>
         <a onclick="showView('main', 'liver')">Liver</a>
-        <a onclick="showView('main', 'ranking')">Ranking</a>
+        <a href="https://tiktok-ranking-cloud-trial.sasaki6960.chatgpt.site/">Ranking</a>
         <a onclick="showView('main', 'news')">News</a>
         <a onclick="showView('contact')">Contact</a>
       </div>
@@ -2790,7 +2792,7 @@ window.addEventListener('DOMContentLoaded', function() {
       if (view === 'liver' && id) { openLiver(id); return; }
       if (view === 'article' && id) { openArticle(id); return; }
       if (view === 'article') { showView('main', 'news'); return; }
-      if (view === 'ranking') { showView('ranking'); return; }
+      if (view === 'ranking') { window.location.replace('https://tiktok-ranking-cloud-trial.sasaki6960.chatgpt.site/'); return; }
       if (view === 'about') { showView('about'); return; }
       if (view === 'entry') { showView('entry'); return; }
     }
@@ -2893,33 +2895,7 @@ function jsonpRequest(url, callbackPrefix, onSuccess, onError, timeoutMs) {
 }
 
 function loadEventRankings() {
-  var container = document.getElementById('event-ranking-list');
-  if (!container) return;
-
-  jsonpRequest(
-    RANKING_API_URL + '?action=events',
-    'rankingCb',
-    function(data) {
-      var events = (data.events || []).filter(function(e) { return e.status === '有効'; });
-      if (events.length === 0) {
-        container.innerHTML = '<div class="event-empty">現在開催中のイベントはありません</div>';
-        return;
-      }
-      container.innerHTML = events.map(function(ev) {
-        return '<a class="event-card" href="' + ev.publicUrl + '" target="_blank" rel="noopener">' +
-                 '<div class="event-card-icon">🏆</div>' +
-                 '<div class="event-card-body">' +
-                   '<div class="event-card-label">Event ' + String(ev.id).padStart(2, '0') + '</div>' +
-                   '<div class="event-card-name">' + escapeHtml(ev.name) + '</div>' +
-                 '</div>' +
-                 '<div class="event-card-arrow">→</div>' +
-               '</a>';
-      }).join('');
-    },
-    function(err) {
-      container.innerHTML = '<div class="event-error">イベント情報の取得に失敗しました。</div>';
-    }
-  );
+  // Ranking navigation uses the shared public ranking Site linked in the HTML.
 }
 
 // ============== News Loader ==============
