@@ -1224,6 +1224,10 @@ section {
   display: flex;
   flex-direction: column;
 }
+.news-card { text-decoration: none; color: inherit; }
+.news-all-link { display: inline-flex; align-items: center; justify-content: center; min-width: 88px; min-height: 48px; padding: .65rem 1.5rem; border: 1px solid currentColor; border-radius: 999px; color: var(--fg); text-decoration: none; font-weight: 700; letter-spacing: .12em; }
+.news-all-link:hover, .news-all-link:focus-visible { background: white; }
+#view-news .news-section { min-height: 70vh; padding-top: 3rem; }
 .news-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
 .news-thumb {
   aspect-ratio: 16/9;
@@ -2339,6 +2343,7 @@ footer {
         <h2 class="section-title">最新の<em>お知らせ</em></h2>
         <p class="section-subtitle">SFのイベント・レポート・コラムをお届け。</p>
       </div>
+      <a class="news-all-link" href="#/news" onclick="showView('news'); return false;" aria-label="お知らせをすべて見る">ALL</a>
     </div>
     <div class="news-grid" id="news-grid">
       <div class="news-loading">読み込み中...</div>
@@ -2662,13 +2667,23 @@ footer {
 
 </div>
 
+<!-- ============== NEWS LIST VIEW ============== -->
+<div id="view-news" class="view">
+  <div class="breadcrumb"><a href="#" onclick="showView('main'); return false;">Home</a><span class="sep">/</span><span class="current">News</span></div>
+  <section class="news-section" aria-labelledby="news-list-title"><div class="news-inner">
+    <span class="section-label">News</span>
+    <div class="news-header"><div><h1 class="section-title" id="news-list-title">お知らせ<em>一覧</em></h1><p class="section-subtitle">イベント・レポート・コラムを新しい順に掲載しています。</p></div></div>
+    <div class="news-grid" id="news-list-grid"><div class="news-loading">読み込み中...</div></div>
+  </div></section>
+</div>
+
 <!-- ============== ARTICLE VIEW (動的) ============== -->
 <div id="view-article" class="view">
 
 <div class="breadcrumb">
   <a onclick="showView('main')">Home</a>
   <span class="sep">/</span>
-  <a onclick="showView('main', 'news')">News</a>
+  <a href="#/news" onclick="showView('news'); return false;">News</a>
   <span class="sep">/</span>
   <span class="current" id="article-breadcrumb-current">記事</span>
 </div>
@@ -2793,6 +2808,7 @@ window.addEventListener('DOMContentLoaded', function() {
       if (view === 'article' && id) { openArticle(id); return; }
       if (view === 'article') { showView('main', 'news'); return; }
       if (view === 'ranking') { window.location.replace('https://tiktok-ranking-cloud-trial.sasaki6960.chatgpt.site/'); return; }
+      if (view === 'news') { showView('news', null, true); return; }
       if (view === 'about') { showView('about'); return; }
       if (view === 'entry') { showView('entry'); return; }
     }
@@ -2899,40 +2915,49 @@ function loadEventRankings() {
 }
 
 // ============== News Loader ==============
+function newsDateValue(item) {
+  var date = String(item.date || '').trim().replace(/[年./]/g, '-').replace(/月/g, '-').replace(/日/g, '');
+  var value = Date.parse(date);
+  return Number.isFinite(value) ? value : 0;
+}
+function newsCards(items) {
+  if (!items.length) return '<div class="news-empty">お知らせはありません</div>';
+  return items.map(function(item, idx) {
+    var tagClass = getTagClass(item.category);
+    var thumbStyle = item.thumbnail
+      ? 'data-lazy-bg="' + escapeAttr(proxyImg(item.thumbnail)) + '"'
+      : '';
+    var thumbClass = item.thumbnail ? 'news-thumb' : 'news-thumb p' + ((idx % 4) + 1);
+    return '<a class="news-card" href="#/article/' + encodeURIComponent(item.id) + '" onclick="openArticle(\'' + escapeAttr(item.id) + '\'); return false;">' +
+             '<div class="' + thumbClass + '" ' + thumbStyle + '></div>' +
+             '<div class="news-card-body">' +
+               '<div class="news-meta">' +
+                 '<span class="news-date">' + escapeHtml(item.date) + '</span>' +
+                 '<span class="news-tag ' + tagClass + '">' + escapeHtml(item.category) + '</span>' +
+               '</div>' +
+               '<div class="news-card-title">' + escapeHtml(item.title) + '</div>' +
+             '</div>' +
+           '</a>';
+  }).join('');
+}
+function renderNewsLists(news) {
+  document.getElementById('news-grid').innerHTML = newsCards(news.slice(0, 3));
+  document.getElementById('news-list-grid').innerHTML = newsCards(news);
+}
 function loadNewsList() {
-  var container = document.getElementById('news-grid');
-  if (!container) return;
-
   jsonpRequest(
     RANKING_API_URL + '?action=news',
     'newsCb',
     function(data) {
-      var news = data.news || [];
+      var news = Array.isArray(data.news) ? data.news.slice() : [];
+      news.sort(function(a, b) { return newsDateValue(b) - newsDateValue(a); });
       NEWS_CACHE = news;
-      if (news.length === 0) {
-        container.innerHTML = '<div class="news-empty">お知らせはありません</div>';
-        return;
-      }
-      container.innerHTML = news.map(function(item, idx) {
-        var tagClass = getTagClass(item.category);
-        var thumbStyle = item.thumbnail
-          ? 'data-lazy-bg="' + escapeAttr(proxyImg(item.thumbnail)) + '"'
-          : '';
-        var thumbClass = item.thumbnail ? 'news-thumb' : 'news-thumb p' + ((idx % 4) + 1);
-        return '<div class="news-card" onclick="openArticle(\'' + escapeAttr(item.id) + '\')">' +
-                 '<div class="' + thumbClass + '" ' + thumbStyle + '></div>' +
-                 '<div class="news-card-body">' +
-                   '<div class="news-meta">' +
-                     '<span class="news-date">' + escapeHtml(item.date) + '</span>' +
-                     '<span class="news-tag ' + tagClass + '">' + escapeHtml(item.category) + '</span>' +
-                   '</div>' +
-                   '<div class="news-card-title">' + escapeHtml(item.title) + '</div>' +
-                 '</div>' +
-               '</div>';
-      }).join('');
+      renderNewsLists(news);
     },
-    function(err) {
-      container.innerHTML = '<div class="news-error">お知らせの取得に失敗しました。</div>';
+    function() {
+      ['news-grid', 'news-list-grid'].forEach(function(id) {
+        document.getElementById(id).innerHTML = '<div class="news-error">お知らせの取得に失敗しました。時間をおいて再読み込みしてください。</div>';
+      });
     }
   );
 }
