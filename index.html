@@ -2351,7 +2351,7 @@ footer {
     <div class="news-grid" id="news-grid">
       <div class="news-loading">読み込み中...</div>
     </div>
-    <div class="news-close-row" id="news-close-row" hidden><button class="news-all-link" type="button" onclick="toggleNewsList()" aria-controls="news-grid" aria-expanded="true">閉じる</button></div>
+    <div class="news-close-row" id="news-close-row" hidden><button class="news-all-link" type="button" onclick="toggleNewsList()" aria-controls="news-grid" aria-expanded="true">Close</button></div>
   </div>
 </section>
 
@@ -2949,7 +2949,7 @@ function renderNewsLists(news) {
   document.getElementById('news-grid').innerHTML = newsCards(NEWS_EXPANDED ? news : news.slice(0, 3));
   document.getElementById('news-list-grid').innerHTML = newsCards(news);
   var toggle = document.getElementById('news-toggle');
-  toggle.textContent = NEWS_EXPANDED ? '閉じる' : 'ALL';
+  toggle.textContent = NEWS_EXPANDED ? 'Close' : 'ALL';
   toggle.setAttribute('aria-label', NEWS_EXPANDED ? 'お知らせを最新3件に戻す' : 'お知らせをすべて表示');
   toggle.setAttribute('aria-expanded', String(NEWS_EXPANDED));
   toggle.hidden = news.length <= 3;
