@@ -1227,6 +1227,9 @@ section {
 .news-card { text-decoration: none; color: inherit; }
 .news-all-link { display: inline-flex; align-items: center; justify-content: center; min-width: 88px; min-height: 48px; padding: .65rem 1.5rem; border: 1px solid currentColor; border-radius: 999px; color: var(--fg); text-decoration: none; font-weight: 700; letter-spacing: .12em; }
 .news-all-link:hover, .news-all-link:focus-visible { background: white; }
+.news-all-link { font: inherit; cursor: pointer; background: transparent; }
+#news { scroll-margin-top: 90px; }
+.news-close-row { text-align: center; margin-top: 2rem; }
 #view-news .news-section { min-height: 70vh; padding-top: 3rem; }
 .news-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
 .news-thumb {
@@ -2343,11 +2346,12 @@ footer {
         <h2 class="section-title">最新の<em>お知らせ</em></h2>
         <p class="section-subtitle">SFのイベント・レポート・コラムをお届け。</p>
       </div>
-      <a class="news-all-link" href="#/news" onclick="showView('news'); return false;" aria-label="お知らせをすべて見る">ALL</a>
+      <button class="news-all-link" id="news-toggle" type="button" onclick="toggleNewsList()" aria-controls="news-grid" aria-expanded="false" aria-label="お知らせをすべて表示">ALL</button>
     </div>
     <div class="news-grid" id="news-grid">
       <div class="news-loading">読み込み中...</div>
     </div>
+    <div class="news-close-row" id="news-close-row" hidden><button class="news-all-link" type="button" onclick="toggleNewsList()" aria-controls="news-grid" aria-expanded="true">閉じる</button></div>
   </div>
 </section>
 
@@ -2940,9 +2944,25 @@ function newsCards(items) {
            '</a>';
   }).join('');
 }
+var NEWS_EXPANDED = false;
 function renderNewsLists(news) {
-  document.getElementById('news-grid').innerHTML = newsCards(news.slice(0, 3));
+  document.getElementById('news-grid').innerHTML = newsCards(NEWS_EXPANDED ? news : news.slice(0, 3));
   document.getElementById('news-list-grid').innerHTML = newsCards(news);
+  var toggle = document.getElementById('news-toggle');
+  toggle.textContent = NEWS_EXPANDED ? '閉じる' : 'ALL';
+  toggle.setAttribute('aria-label', NEWS_EXPANDED ? 'お知らせを最新3件に戻す' : 'お知らせをすべて表示');
+  toggle.setAttribute('aria-expanded', String(NEWS_EXPANDED));
+  toggle.hidden = news.length <= 3;
+  document.getElementById('news-close-row').hidden = !NEWS_EXPANDED || news.length <= 3;
+}
+function toggleNewsList() {
+  NEWS_EXPANDED = !NEWS_EXPANDED;
+  renderNewsLists(NEWS_CACHE);
+  observeLazyBackgrounds();
+  if (!NEWS_EXPANDED) {
+    document.getElementById('news').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('news-toggle').focus({ preventScroll: true });
+  }
 }
 function loadNewsList() {
   jsonpRequest(
